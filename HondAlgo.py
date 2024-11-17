@@ -14,8 +14,12 @@ def fetch_stock_data(symbol, period="1y"):
         return None
 
 
-def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
+   def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
     """Calculate EMAs, Williams %R, Relative Volume, and Buy Signal."""
+    # Ensure the DataFrame has valid data
+    if df is None or df.empty or 'Close' not in df.columns:
+        raise ValueError("DataFrame is empty or does not contain required columns.")
+
     # Calculate EMAs
     df['EMA_Fast'] = df['Close'].ewm(span=ema_fast, adjust=False).mean()
     df['EMA_Mid'] = df['Close'].ewm(span=ema_mid, adjust=False).mean()
@@ -26,9 +30,13 @@ def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
     low_roll = df['Low'].rolling(window=wr_length)
     df['%R'] = (high_roll.max() - df['Close']) / (high_roll.max() - low_roll.min()) * -100
 
-    # Volume-based calculations
-    df['Volume_SMA'] = df['Volume'].rolling(window=30).mean()
-    df['Rel_Volume'] = df['Volume'] / df['Volume_SMA']
+    # Volume-based calculations (only if Volume column exists)
+    if 'Volume' in df.columns and not df['Volume'].isnull().all():
+        df['Volume_SMA'] = df['Volume'].rolling(window=30).mean()
+        df['Rel_Volume'] = df['Volume'] / df['Volume_SMA']
+        df['Rel_Volume'] = df['Rel_Volume'].fillna(0)  # Fill NaN values with 0
+    else:
+        df['Rel_Volume'] = 0  # Default to 0 if Volume data is missing
 
     # Buy Signal Conditions
     df['EMA_Aligned'] = (df['EMA_Fast'] > df['EMA_Mid']) & (df['EMA_Mid'] > df['EMA_Slow'])
@@ -44,6 +52,7 @@ def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
     )
     
     return df
+
 
 
 # ================== STREAMLIT UI ==================
