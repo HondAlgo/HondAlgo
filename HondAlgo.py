@@ -50,7 +50,7 @@ wr_length = st.sidebar.number_input("Williams %R Length", value=14, min_value=1)
 
 period = st.sidebar.selectbox(
     "Select Stock Data Period",
-    options=["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "max"],
+    options=["1d", "5d", "1 month", "3 months", "6 months", "1 year", "2 years", "5 years", "10 years", "max"],
     index=5
 )
 
@@ -164,7 +164,7 @@ if st.button("Analyze"):
             st.download_button(
                 label="Download Results as Xlsx",
                 data=file,
-                file_name="HondaAlgo_Results.xlsx",
+                file_name="HondAlgo_Results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
@@ -196,11 +196,20 @@ st.markdown(
         .footer-right {
             text-align: right;
         }
+        .footer-center a {
+            color: white;
+            text-decoration: none;
+        }
+        .footer-center a:hover {
+            text-decoration: underline;
+        }
     </style>
     <div class="footer">
         <div class="footer-content">
-            <div class="footer-center">Designed by M.Hossam</div>
-            <div class="footer-right">© 2024 HondAlgo</div>
+            <div class="footer-center">
+                © 2024 HondAlgo. Designed by: 
+                <a href="https://www.facebook.com/mohamed.hossam.srwat" target="_blank">M.Hossam</a>
+            </div>
         </div>
     </div>
     """,
