@@ -208,7 +208,7 @@ st.markdown(
         <div class="footer-content">
             <div class="footer-center">
                 © 2024 HondAlgo. Designed by: 
-                <a href="NULL" target="_blank">Mohaned Abd-Allah</a>
+                <a href="https://www.facebook.com/Moohaned?rdid=RAxvfYCxu5uneOJW&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1YtvJ13iDG%2F" target="_blank">Mohanad Abdallah</a>
             </div>
         </div>
     </div>
