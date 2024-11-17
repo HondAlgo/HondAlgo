@@ -54,8 +54,6 @@ def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
     return df
 
 
-
-
 # ================== STREAMLIT UI ==================
 
 st.markdown(
@@ -115,15 +113,18 @@ if st.button("Analyze"):
                 unsafe_allow_html=True
             )
             progress.progress(int((i + 1) * step))
-            df = fetch_stock_data(symbol, period=period)
-
-            if df is None or df.empty:
-                error_stocks.append(symbol)
-                continue
             
-            df = calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length)
-            if df['Buy_Signal'].iloc[-1]:
-                qualifying_stocks.append(symbol)
+            try:
+                df = fetch_stock_data(symbol, period=period)
+                if df is None or df.empty:
+                    raise ValueError(f"No data available for {symbol}.")
+                
+                df = calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length)
+                if df['Buy_Signal'].iloc[-1]:
+                    qualifying_stocks.append(symbol)
+            except Exception as e:
+                error_stocks.append(symbol)
+                st.warning(f"Error analyzing {symbol}: {str(e)}")
 
             time.sleep(0.5)
         
