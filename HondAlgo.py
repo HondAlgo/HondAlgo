@@ -201,7 +201,6 @@ st.markdown(
             text-decoration: none;
         }
         .footer-center a:hover {
-            color: blue; /* Change color to blue on hover */
             text-decoration: underline;
         }
     </style>
@@ -209,7 +208,7 @@ st.markdown(
         <div class="footer-content">
             <div class="footer-center">
                 © 2024 HondAlgo. Designed by: 
-                <a href="https://www.facebook.com/mohamed.hossam.srwat" target="_blank">M.Hossam</a>
+                <a href="https://www.facebook.com/share/1YtvJ13iDG/" target="_blank">Mohaned Abdallah</a>
             </div>
         </div>
     </div>
