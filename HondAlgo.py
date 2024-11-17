@@ -162,11 +162,11 @@ if st.button("Analyze"):
 
         with open("results.xlsx", "rb") as file:
             st.download_button(
-                label="Download Results as Xlsx",
-                data=file,
-                file_name="HondAlgo_Results.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+    label="Download Results as Xlsx",
+    data=file,
+    file_name="HondAlgo_Results.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
 
 # ================== FOOTER ==================
 
