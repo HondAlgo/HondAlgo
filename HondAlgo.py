@@ -14,7 +14,7 @@ def fetch_stock_data(symbol, period="1y"):
         return None
 
 
-   def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
+def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
     """Calculate EMAs, Williams %R, Relative Volume, and Buy Signal."""
     # Ensure the DataFrame has valid data
     if df is None or df.empty or 'Close' not in df.columns:
@@ -52,6 +52,7 @@ def fetch_stock_data(symbol, period="1y"):
     )
     
     return df
+
 
 
 
