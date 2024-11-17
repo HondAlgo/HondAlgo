@@ -6,25 +6,42 @@ import time
 
 # ================== FUNCTIONS ==================
 
-def fetch_stock_data(symbol, period):
+def fetch_stock_data(symbol, period="1y"):
+    """Fetch historical daily data for a stock symbol."""
     try:
         return yf.download(symbol, period=period, interval="1d")
-    except Exception:
+    except Exception as e:
         return None
 
 
 def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
+    """Calculate EMAs, Williams %R, Relative Volume, and Buy Signal."""
+    # Calculate EMAs
     df['EMA_Fast'] = df['Close'].ewm(span=ema_fast, adjust=False).mean()
     df['EMA_Mid'] = df['Close'].ewm(span=ema_mid, adjust=False).mean()
     df['EMA_Slow'] = df['Close'].ewm(span=ema_slow, adjust=False).mean()
 
+    # Calculate Williams %R
     high_roll = df['High'].rolling(window=wr_length)
     low_roll = df['Low'].rolling(window=wr_length)
     df['%R'] = (high_roll.max() - df['Close']) / (high_roll.max() - low_roll.min()) * -100
 
+    # Volume-based calculations
+    df['Volume_SMA'] = df['Volume'].rolling(window=30).mean()
+    df['Rel_Volume'] = df['Volume'] / df['Volume_SMA']
+
+    # Buy Signal Conditions
     df['EMA_Aligned'] = (df['EMA_Fast'] > df['EMA_Mid']) & (df['EMA_Mid'] > df['EMA_Slow'])
     df['WR_Cross'] = (df['%R'].shift(1) <= -80) & (df['%R'] > -80)
-    df['Buy_Signal'] = df['EMA_Aligned'] & df['WR_Cross']
+    df['Close_Above_EMA50'] = df['Close'] > df['EMA_Mid']
+    
+    # Final Buy Signal
+    df['Buy_Signal'] = (
+        df['EMA_Aligned'] & 
+        df['WR_Cross'] & 
+        df['Close_Above_EMA50'] & 
+        (df['Rel_Volume'] > 1)  # Ensure relative volume is above average
+    )
     
     return df
 
@@ -35,7 +52,7 @@ st.markdown(
     """
     <div style="text-align: center;">
         <h1>HondAlgo</h1>
-        <p>Algorithm analyze stock data and detect stocks with high bullish potential.</p>
+        <p>Algorithm analyzes stock data and detects stocks with high bullish potential.</p>
     </div>
     """,
     unsafe_allow_html=True
@@ -48,11 +65,7 @@ ema_mid = st.sidebar.number_input("Mid EMA Length", value=50, min_value=1)
 ema_slow = st.sidebar.number_input("Slow EMA Length", value=100, min_value=1)
 wr_length = st.sidebar.number_input("Williams %R Length", value=14, min_value=1)
 
-period = st.sidebar.selectbox(
-    "Select Stock Data Period",
-    options=["1d", "5d", "1 month", "3 months", "6 months", "1 year", "2 years", "5 years", "10 years", "max"],
-    index=5
-)
+period = "1y"  # Fixed 1-year period for consistency
 
 st.markdown(
     """
@@ -64,28 +77,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 symbols = st.text_area("", "AAPL, MSFT, TSLA")
-
-st.markdown(
-    """
-    <style>
-        div.stButton > button {
-            display: block;
-            margin: 0 auto;
-            background-color: #333333;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        div.stButton > button:hover {
-            background-color: #444444;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 # ================== ANALYSIS PROCESS ==================
 
@@ -192,9 +183,6 @@ st.markdown(
         .footer-center {
             flex: 1;
             text-align: center;
-        }
-        .footer-right {
-            text-align: right;
         }
         .footer-center a {
             color: white;
