@@ -201,6 +201,7 @@ st.markdown(
             text-decoration: none;
         }
         .footer-center a:hover {
+            color: blue;
             text-decoration: underline;
         }
     </style>
