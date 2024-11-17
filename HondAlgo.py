@@ -162,11 +162,11 @@ if st.button("Analyze"):
 
         with open("results.xlsx", "rb") as file:
             st.download_button(
-    label="Download Results as Xlsx",
-    data=file,
-    file_name="HondAlgo_Results.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+                label="Download Results as Xlsx",
+                data=file,
+                file_name="HondAlgo_Results.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
 # ================== FOOTER ==================
 
@@ -201,7 +201,6 @@ st.markdown(
             text-decoration: none;
         }
         .footer-center a:hover {
-            color: blue; /* Change color to blue on hover */
             text-decoration: underline;
         }
     </style>
@@ -215,6 +214,4 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True
-)
-
 )
