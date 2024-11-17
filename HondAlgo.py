@@ -196,7 +196,10 @@ st.markdown(
         .footer-right {
             text-align: right;
         }
-   
+        .footer-center a {
+            color: white;
+            text-decoration: none;
+        }
         .footer-center a:hover {
             text-decoration: underline;
         }
