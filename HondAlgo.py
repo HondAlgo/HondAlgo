@@ -176,6 +176,7 @@ if st.button("Analyze"):
         )
 
         # Combine results into a single DataFrame
+                # Combine results into a single DataFrame
         max_len = max(len(qualifying_stocks), len(not_qualified_stocks), len(error_stocks))
         combined_results = pd.DataFrame({
             "Qualified Stocks": qualifying_stocks + [""] * (max_len - len(qualifying_stocks)),
@@ -183,12 +184,16 @@ if st.button("Analyze"):
             "Lost Stocks": error_stocks + [""] * (max_len - len(error_stocks))
         })
 
+        # Adjust the index to start from 1
+        combined_results.index += 1
+
+        # Display combined results
         st.markdown("### Results")
         st.dataframe(combined_results)
 
         # Save results to Excel
         with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
-            combined_results.to_excel(writer, index=False, sheet_name="Stocks Analysis")
+            combined_results.to_excel(writer, index=True, sheet_name="Stocks Analysis", index_label="Index")
 
         with open("results.xlsx", "rb") as file:
             st.download_button(
@@ -197,6 +202,7 @@ if st.button("Analyze"):
                 file_name="HondAlgo_Results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
 
 
 # ================== FOOTER ==================
