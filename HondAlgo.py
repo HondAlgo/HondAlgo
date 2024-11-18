@@ -205,9 +205,8 @@ if st.button("Analyze"):
             "Lost Stocks": error_stocks + [""] * (max_len - len(error_stocks))
         })
 
-        # Display combined results without index
         st.markdown("### Results")
-        st.dataframe(combined_results)
+        st.dataframe(combined_results.reset_index(drop=True))
 
         # Save results to Excel
         with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
