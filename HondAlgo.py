@@ -80,15 +80,37 @@ st.markdown(
 
 # Sidebar for parameter inputs
 st.sidebar.header("Set Parameters")
-ema_fast = st.sidebar.number_input("Fast EMA Length", value=20, min_value=1)
-ema_mid = st.sidebar.number_input("Mid EMA Length", value=50, min_value=1)
-ema_slow = st.sidebar.number_input("Slow EMA Length", value=100, min_value=1)
-wr_length = st.sidebar.number_input("Williams %R Length", value=14, min_value=1)
+reset = st.sidebar.button("Reset Parameters")
+
+if reset:
+    st.session_state.ema_fast = 20
+    st.session_state.ema_mid = 50
+    st.session_state.ema_slow = 100
+    st.session_state.wr_length = 14
+    st.session_state.period = "1 year"
+
+# Initialize session state variables if not set
+if "ema_fast" not in st.session_state:
+    st.session_state.ema_fast = 20
+if "ema_mid" not in st.session_state:
+    st.session_state.ema_mid = 50
+if "ema_slow" not in st.session_state:
+    st.session_state.ema_slow = 100
+if "wr_length" not in st.session_state:
+    st.session_state.wr_length = 14
+if "period" not in st.session_state:
+    st.session_state.period = "1 year"
+
+ema_fast = st.sidebar.number_input("Fast EMA Length", value=st.session_state.ema_fast, min_value=1, key="ema_fast")
+ema_mid = st.sidebar.number_input("Mid EMA Length", value=st.session_state.ema_mid, min_value=1, key="ema_mid")
+ema_slow = st.sidebar.number_input("Slow EMA Length", value=st.session_state.ema_slow, min_value=1, key="ema_slow")
+wr_length = st.sidebar.number_input("Williams %R Length", value=st.session_state.wr_length, min_value=1, key="wr_length")
 
 period = st.sidebar.selectbox(
     "Select Stock Data Period",
     options=["1d", "5d", "1 month", "3 months", "6 months", "1 year", "2 years", "5 years", "10 years", "max"],
-    index=5
+    index=["1d", "5d", "1 month", "3 months", "6 months", "1 year", "2 years", "5 years", "10 years", "max"].index(st.session_state.period),
+    key="period"
 )
 
 st.markdown(
@@ -102,29 +124,6 @@ st.markdown(
 )
 symbols = st.text_area("", "AAPL, MSFT, TSLA")
 
-st.markdown(
-    """
-    <style>
-        div.stButton > button {
-            display: block;
-            margin: 0 auto;
-            background-color: #333333;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        div.stButton > button:hover {
-            background-color: #444444;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# ================== ANALYSIS PROCESS ==================
 # ================== ANALYSIS PROCESS ==================
 
 if st.button("Analyze"):
@@ -176,7 +175,6 @@ if st.button("Analyze"):
         )
 
         # Combine results into a single DataFrame
-                # Combine results into a single DataFrame
         max_len = max(len(qualifying_stocks), len(not_qualified_stocks), len(error_stocks))
         combined_results = pd.DataFrame({
             "Qualified Stocks": qualifying_stocks + [""] * (max_len - len(qualifying_stocks)),
@@ -184,16 +182,13 @@ if st.button("Analyze"):
             "Lost Stocks": error_stocks + [""] * (max_len - len(error_stocks))
         })
 
-        # Adjust the index to start from 1
-        combined_results.index += 1
-
-        # Display combined results
+        # Display combined results without index
         st.markdown("### Results")
-        st.dataframe(combined_results)
+        st.dataframe(combined_results.style.hide_index())
 
         # Save results to Excel
         with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
-            combined_results.to_excel(writer, index=True, sheet_name="Stocks Analysis", index_label="Index")
+            combined_results.to_excel(writer, index=False, sheet_name="Stocks Analysis")
 
         with open("results.xlsx", "rb") as file:
             st.download_button(
@@ -203,52 +198,3 @@ if st.button("Analyze"):
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
-
-
-# ================== FOOTER ==================
-
-st.markdown(
-    """
-    <style>
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 10px 0;
-            background-color: #333333;
-            color: white;
-            font-size: 14px;
-        }
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-        .footer-center {
-            flex: 1;
-            text-align: center;
-        }
-        .footer-right {
-            text-align: right;
-        }
-        .footer-center a {
-            color: white;
-            text-decoration: none;
-        }
-        .footer-center a:hover {
-            text-decoration: underline;
-        }
-    </style>
-    <div class="footer">
-        <div class="footer-content">
-            <div class="footer-center">
-                © 2024 HondAlgo. Designed by: 
-                <a href="https://www.facebook.com/share/1YtvJ13iDG/" target="_blank">Mohaned Abdallah</a>
-            </div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
