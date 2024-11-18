@@ -125,79 +125,33 @@ st.markdown(
 )
 
 # ================== ANALYSIS PROCESS ==================
-# ================== ANALYSIS PROCESS ==================
-
 if st.button("Analyze"):
-    stock_symbols = [s.strip() for s in symbols.split(",") if s.strip()]
+    # ... [Analysis code here]
     
-    if not stock_symbols:
-        st.error("Please provide at least one stock symbol.")
-    else:
-        analyzing_placeholder = st.markdown(
-            f"<div style='text-align: center; font-size: 18px;'>Analyzing {len(stock_symbols)} stocks 📈💹...</div>",
-            unsafe_allow_html=True
+    # Combine results into a single DataFrame with index starting from 1
+    max_len = max(len(qualifying_stocks), len(not_qualified_stocks), len(error_stocks))
+    combined_results = pd.DataFrame({
+        "Qualified Stocks": qualifying_stocks + [""] * (max_len - len(qualifying_stocks)),
+        "Unqualified Stocks": not_qualified_stocks + [""] * (max_len - len(not_qualified_stocks)),
+        "Lost Stocks": error_stocks + [""] * (max_len - len(error_stocks))
+    })
+    combined_results.index += 1  # Set the index to start from 1
+
+    # Display combined results
+    st.markdown("### Results")
+    st.dataframe(combined_results)
+
+    # Save results to Excel
+    with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
+        combined_results.to_excel(writer, index=True, sheet_name="Stocks Analysis", index_label="Index")
+
+    with open("results.xlsx", "rb") as file:
+        st.download_button(
+            label="Download Results as Xlsx",
+            data=file,
+            file_name="HondAlgo_Results.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-
-        qualifying_stocks = []
-        not_qualified_stocks = []
-        error_stocks = []
-        progress = st.progress(0)
-        status_placeholder = st.empty()
-        step = 100 / len(stock_symbols)
-        stock_icons = ["📈", "📉", "💹", "📊", "💵"]
-
-        for i, symbol in enumerate(stock_symbols):
-            current_icon = stock_icons[i % len(stock_icons)]
-            status_placeholder.markdown(
-                f"<div style='text-align: center; font-size: 18px;'>Analyzing {i+1}/{len(stock_symbols)}: {symbol} {current_icon}</div>",
-                unsafe_allow_html=True
-            )
-            progress.progress(int((i + 1) * step))
-            df = fetch_stock_data(symbol, period=period)
-
-            if df is None or df.empty:
-                error_stocks.append(symbol)
-                continue
-            
-            df = calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length)
-            if df['Buy_Signal'].iloc[-1]:
-                qualifying_stocks.append(symbol)
-            else:
-                not_qualified_stocks.append(symbol)
-
-            time.sleep(0.5)
-        
-        status_placeholder.empty()
-        analyzing_placeholder.empty()
-
-        st.markdown(
-            f"<div style='text-align: center; font-size: 18px; color: green;'>{len(stock_symbols)} stocks have been analyzed successfully ✅</div>",
-            unsafe_allow_html=True
-        )
-
-        # Combine results into a single DataFrame
-        max_len = max(len(qualifying_stocks), len(not_qualified_stocks), len(error_stocks))
-        combined_results = pd.DataFrame({
-            "Qualified Stocks": qualifying_stocks + [""] * (max_len - len(qualifying_stocks)),
-            "Unqualified Stocks": not_qualified_stocks + [""] * (max_len - len(not_qualified_stocks)),
-            "Lost Stocks": error_stocks + [""] * (max_len - len(error_stocks))
-        })
-
-        st.markdown("### Results")
-        st.dataframe(combined_results)
-
-        # Save results to Excel
-        with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
-            combined_results.to_excel(writer, index=False, sheet_name="Stocks Analysis")
-
-        with open("results.xlsx", "rb") as file:
-            st.download_button(
-                label="Download Results as Xlsx",
-                data=file,
-                file_name="HondAlgo_Results.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-
 # ================== FOOTER ==================
 
 st.markdown(
