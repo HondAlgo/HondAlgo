@@ -126,6 +126,8 @@ st.markdown(
 
 # ================== ANALYSIS PROCESS ==================
 
+# ================== ANALYSIS PROCESS ==================
+
 if st.button("Analyze"):
     stock_symbols = [s.strip() for s in symbols.split(",") if s.strip()]
     
@@ -138,6 +140,7 @@ if st.button("Analyze"):
         )
 
         qualifying_stocks = []
+        not_qualified_stocks = []
         error_stocks = []
         progress = st.progress(0)
         status_placeholder = st.empty()
@@ -160,6 +163,8 @@ if st.button("Analyze"):
             df = calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length)
             if df['Buy_Signal'].iloc[-1]:
                 qualifying_stocks.append(symbol)
+            else:
+                not_qualified_stocks.append(symbol)
 
             time.sleep(0.5)
         
@@ -181,6 +186,14 @@ if st.button("Analyze"):
         else:
             st.write("No qualified stocks found.")
 
+        if not_qualified_stocks:
+            st.subheader("Not Qualified Stocks")
+            df_not_qualified = pd.DataFrame(not_qualified_stocks, columns=["Stock"])
+            df_not_qualified.index += 1
+            st.dataframe(df_not_qualified)
+        else:
+            st.write("All stocks were qualified.")
+
         if error_stocks:
             st.subheader("Lost Stocks")
             df_errors = pd.DataFrame(error_stocks, columns=["Stock"])
@@ -192,9 +205,11 @@ if st.button("Analyze"):
         with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
             if qualifying_stocks:
                 df_qualifying.to_excel(writer, index=False, sheet_name="Buy Signals")
+            if not_qualified_stocks:
+                pd.DataFrame(not_qualified_stocks, columns=["Not Qualified Stocks"]).to_excel(writer, index=False, sheet_name="Not Qualified")
             if error_stocks:
                 pd.DataFrame(error_stocks, columns=["Lost Stocks"]).to_excel(writer, index=False, sheet_name="Errors")
-            if not qualifying_stocks and not error_stocks:
+            if not qualifying_stocks and not not_qualified_stocks and not error_stocks:
                 pd.DataFrame(["No available data"]).to_excel(writer, index=False, header=False, sheet_name="No Data")
 
         with open("results.xlsx", "rb") as file:
@@ -204,6 +219,7 @@ if st.button("Analyze"):
                 file_name="HondAlgo_Results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
 
 # ================== FOOTER ==================
 
