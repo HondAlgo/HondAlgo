@@ -150,24 +150,30 @@ analyze_placeholder = st.markdown(
 # ================== ANALYSIS PROCESS ==================
 
 if st.button("Analyze"):
+    # Split symbols entered by the user
     stock_symbols = [s.strip() for s in symbols.split(",") if s.strip()]
     
     if not stock_symbols:
         st.error("Please provide at least one stock symbol.")
     else:
+        # Initialize variables to store results
+        qualifying_stocks = []
+        not_qualified_stocks = []
+        error_stocks = []
+
+        # Display analyzing message
         analyzing_placeholder = st.markdown(
             f"<div style='text-align: center; font-size: 18px;'>Analyzing {len(stock_symbols)} stocks 📈💹...</div>",
             unsafe_allow_html=True
         )
 
-        qualifying_stocks = []
-        not_qualified_stocks = []
-        error_stocks = []
+        # Display progress bar
         progress = st.progress(0)
         status_placeholder = st.empty()
         step = 100 / len(stock_symbols)
         stock_icons = ["📈", "📉", "💹", "📊", "💵"]
 
+        # Loop through each stock symbol for analysis
         for i, symbol in enumerate(stock_symbols):
             current_icon = stock_icons[i % len(stock_icons)]
             status_placeholder.markdown(
@@ -181,6 +187,7 @@ if st.button("Analyze"):
                 error_stocks.append(symbol)
                 continue
             
+            # Calculate indicators
             df = calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length)
             if df['Buy_Signal'].iloc[-1]:
                 qualifying_stocks.append(symbol)
@@ -189,9 +196,11 @@ if st.button("Analyze"):
 
             time.sleep(0.5)
         
+        # Clear placeholders
         status_placeholder.empty()
         analyzing_placeholder.empty()
 
+        # Display success message
         st.markdown(
             f"<div style='text-align: center; font-size: 18px; color: green;'>{len(stock_symbols)} stocks have been analyzed successfully ✅</div>",
             unsafe_allow_html=True
@@ -205,13 +214,15 @@ if st.button("Analyze"):
             "Lost Stocks": error_stocks + [""] * (max_len - len(error_stocks))
         })
 
+        # Display combined results without index column
         st.markdown("### Results")
         st.dataframe(combined_results.reset_index(drop=True))
 
-        # Save results to Excel
+        # Save results to Excel without index
         with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
             combined_results.to_excel(writer, index=False, sheet_name="Stocks Analysis")
 
+        # Provide download button for results
         with open("results.xlsx", "rb") as file:
             st.download_button(
                 label="Download Results as Xlsx",
@@ -219,6 +230,7 @@ if st.button("Analyze"):
                 file_name="HondAlgo_Results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
 
 # ================= FOOTER =================
 
