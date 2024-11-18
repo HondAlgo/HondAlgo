@@ -125,7 +125,6 @@ st.markdown(
 )
 
 # ================== ANALYSIS PROCESS ==================
-
 # ================== ANALYSIS PROCESS ==================
 
 if st.button("Analyze"):
@@ -176,41 +175,20 @@ if st.button("Analyze"):
             unsafe_allow_html=True
         )
 
+        # Combine results into a single DataFrame
+        max_len = max(len(qualifying_stocks), len(not_qualified_stocks), len(error_stocks))
+        combined_results = pd.DataFrame({
+            "Qualified Stocks": qualifying_stocks + [""] * (max_len - len(qualifying_stocks)),
+            "Unqualified Stocks": not_qualified_stocks + [""] * (max_len - len(not_qualified_stocks)),
+            "Lost Stocks": error_stocks + [""] * (max_len - len(error_stocks))
+        })
+
         st.markdown("### Results")
-        
-        if qualifying_stocks:
-            st.subheader("Qualified Stocks")
-            df_qualifying = pd.DataFrame(qualifying_stocks, columns=["Stock"])
-            df_qualifying.index += 1
-            st.dataframe(df_qualifying)
-        else:
-            st.write("No qualified stocks found.")
+        st.dataframe(combined_results)
 
-        if not_qualified_stocks:
-            st.subheader("Not Qualified Stocks")
-            df_not_qualified = pd.DataFrame(not_qualified_stocks, columns=["Stock"])
-            df_not_qualified.index += 1
-            st.dataframe(df_not_qualified)
-        else:
-            st.write("All stocks were qualified.")
-
-        if error_stocks:
-            st.subheader("Lost Stocks")
-            df_errors = pd.DataFrame(error_stocks, columns=["Stock"])
-            df_errors.index += 1
-            st.dataframe(df_errors)
-        else:
-            st.write("No errors detected.")
-
+        # Save results to Excel
         with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
-            if qualifying_stocks:
-                df_qualifying.to_excel(writer, index=False, sheet_name="Buy Signals")
-            if not_qualified_stocks:
-                pd.DataFrame(not_qualified_stocks, columns=["Not Qualified Stocks"]).to_excel(writer, index=False, sheet_name="Not Qualified")
-            if error_stocks:
-                pd.DataFrame(error_stocks, columns=["Lost Stocks"]).to_excel(writer, index=False, sheet_name="Errors")
-            if not qualifying_stocks and not not_qualified_stocks and not error_stocks:
-                pd.DataFrame(["No available data"]).to_excel(writer, index=False, header=False, sheet_name="No Data")
+            combined_results.to_excel(writer, index=False, sheet_name="Stocks Analysis")
 
         with open("results.xlsx", "rb") as file:
             st.download_button(
@@ -219,7 +197,6 @@ if st.button("Analyze"):
                 file_name="HondAlgo_Results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-
 
 # ================== FOOTER ==================
 
