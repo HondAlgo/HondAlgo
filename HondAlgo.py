@@ -80,14 +80,6 @@ st.markdown(
 
 # Sidebar for parameter inputs
 st.sidebar.header("Set Parameters")
-reset = st.sidebar.button("Reset Parameters")
-
-if reset:
-    st.session_state.ema_fast = 20
-    st.session_state.ema_mid = 50
-    st.session_state.ema_slow = 100
-    st.session_state.wr_length = 14
-    st.session_state.period = "1 year"
 
 # Initialize session state variables if not set
 if "ema_fast" not in st.session_state:
@@ -113,6 +105,14 @@ period = st.sidebar.selectbox(
     key="period"
 )
 
+reset = st.sidebar.button("Reset Parameters")
+if reset:
+    st.session_state.ema_fast = 20
+    st.session_state.ema_mid = 50
+    st.session_state.ema_slow = 100
+    st.session_state.wr_length = 14
+    st.session_state.period = "1 year"
+
 st.markdown(
     """
     <div style="text-align: center;">
@@ -123,6 +123,29 @@ st.markdown(
     unsafe_allow_html=True
 )
 symbols = st.text_area("", "AAPL, MSFT, TSLA")
+
+# Centered Analyze button
+analyze_placeholder = st.markdown(
+    """
+    <style>
+        div.stButton > button {
+            display: block;
+            margin: 0 auto;
+            background-color: #333333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        div.stButton > button:hover {
+            background-color: #444444;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # ================== ANALYSIS PROCESS ==================
 
@@ -184,7 +207,7 @@ if st.button("Analyze"):
 
         # Display combined results without index
         st.markdown("### Results")
-        st.dataframe(combined_results.style.hide_index())
+        st.dataframe(combined_results)
 
         # Save results to Excel
         with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
@@ -198,3 +221,45 @@ if st.button("Analyze"):
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
+# ================= FOOTER =================
+
+st.markdown(
+    """
+    <style>
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 0;
+            background-color: #333333;
+            color: white;
+            font-size: 14px;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .footer-center {
+            flex: 1;
+            text-align: center;
+        }
+        .footer-right {
+            text-align: right;
+        }
+    </style>
+    <div class="footer">
+        <div class="footer-content">
+            <div class="footer-center">
+                Designed by M.Hossam
+            </div>
+            <div class="footer-right">
+                Copyright © 2024 Hondalgo
+            </div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
