@@ -1,50 +1,20 @@
 import streamlit as st
 import pandas as pd
-import requests
+import yfinance as yf
 import time
+import matplotlib.pyplot as plt
 
 # ================== FUNCTIONS ==================
 
 def fetch_stock_data(symbol, period):
-    # Define the base URL for EODHD API
-    base_url = "https://eodhistoricaldata.com/api/eod"
-
-    # Define the period mappings for EODHD
-    period_map = {
-        "1d": "1d", "5d": "5d", "1 month": "1mo", "3 months": "3mo",
-        "6 months": "6mo", "1 year": "1y", "2 years": "2y",
-        "5 years": "5y", "10 years": "10y", "max": "max"
-    }
-
-    # Map the selected period to EODHD's period
-    api_period = period_map.get(period, "1y")
-
-    # Construct the request URL
-    url = f"{base_url}/{symbol}.US"
-
-    # Parameters for the API
-    params = {
-        "api_token": "673b9626ee95c0.80706722",  # Replace with your API key
-        "fmt": "json"  # Fetch data in JSON format
-    }
-
     try:
-        # Send the API request
-        response = requests.get(url, params=params)
-        response.raise_for_status()  # Raise HTTP errors, if any
-
-        # Parse the JSON data
-        data = response.json()
-
-        # Convert JSON to Pandas DataFrame
-        df = pd.DataFrame(data)
-        df['Date'] = pd.to_datetime(df['date'])
-        df.set_index('Date', inplace=True)
-
-        # Ensure required columns exist
-        df.rename(columns={"close": "Close", "high": "High", "low": "Low"}, inplace=True)
-
-        return df
+        # Fetch data for the stock symbol
+        data = yf.download(symbol, period=period, interval="1d")
+        if data.empty:
+            print(f"No data found for symbol: {symbol}")
+            return None
+        print(f"Data fetched successfully for {symbol}.")
+        return data
     except Exception as e:
         print(f"Error fetching data for {symbol}: {e}")
         return None
@@ -72,7 +42,7 @@ st.markdown(
     """
     <div style="text-align: center;">
         <h1>HondAlgo</h1>
-        <p>Algorithm analyze stock data and detect stocks with high bullish potential.</p>
+        <p>Algorithm analyzes stock data and detects stocks with high bullish potential.</p>
     </div>
     """,
     unsafe_allow_html=True
@@ -102,28 +72,6 @@ st.markdown(
 )
 symbols = st.text_area("", "AAPL, MSFT, TSLA")
 
-st.markdown(
-    """
-    <style>
-        div.stButton > button {
-            display: block;
-            margin: 0 auto;
-            background-color: #333333;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        div.stButton > button:hover {
-            background-color: #444444;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # ================== ANALYSIS PROCESS ==================
 
 if st.button("Analyze"):
@@ -137,8 +85,9 @@ if st.button("Analyze"):
             unsafe_allow_html=True
         )
 
-        qualifying_stocks = []
-        error_stocks = []
+        qualified_stocks = []
+        unqualified_stocks = []
+        lost_stocks = []
         progress = st.progress(0)
         status_placeholder = st.empty()
         step = 100 / len(stock_symbols)
@@ -154,12 +103,14 @@ if st.button("Analyze"):
             df = fetch_stock_data(symbol, period=period)
 
             if df is None or df.empty:
-                error_stocks.append(symbol)
+                lost_stocks.append(symbol)
                 continue
             
             df = calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length)
             if df['Buy_Signal'].iloc[-1]:
-                qualifying_stocks.append(symbol)
+                qualified_stocks.append(symbol)
+            else:
+                unqualified_stocks.append(symbol)
 
             time.sleep(0.5)
         
@@ -171,31 +122,44 @@ if st.button("Analyze"):
             unsafe_allow_html=True
         )
 
+        # Display Results
         st.markdown("### Results")
-        
-        if qualifying_stocks:
+
+        # Qualified Stocks
+        if qualified_stocks:
             st.subheader("Qualified Stocks")
-            df_qualifying = pd.DataFrame(qualifying_stocks, columns=["Stock"])
-            df_qualifying.index += 1
-            st.dataframe(df_qualifying)
+            df_qualified = pd.DataFrame(qualified_stocks, columns=["Stock"])
+            df_qualified.index += 1
+            st.dataframe(df_qualified)
         else:
             st.write("No qualified stocks found.")
 
-        if error_stocks:
-            st.subheader("Lost Stocks")
-            df_errors = pd.DataFrame(error_stocks, columns=["Stock"])
-            df_errors.index += 1
-            st.dataframe(df_errors)
+        # Unqualified Stocks
+        if unqualified_stocks:
+            st.subheader("Unqualified Stocks")
+            df_unqualified = pd.DataFrame(unqualified_stocks, columns=["Stock"])
+            df_unqualified.index += 1
+            st.dataframe(df_unqualified)
         else:
-            st.write("No errors detected.")
+            st.write("No unqualified stocks.")
 
+        # Lost Stocks
+        if lost_stocks:
+            st.subheader("Lost Stocks")
+            df_lost = pd.DataFrame(lost_stocks, columns=["Stock"])
+            df_lost.index += 1
+            st.dataframe(df_lost)
+        else:
+            st.write("No lost stocks.")
+
+        # Download Results
         with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
-            if qualifying_stocks:
-                df_qualifying.to_excel(writer, index=False, sheet_name="Buy Signals")
-            if error_stocks:
-                pd.DataFrame(error_stocks, columns=["Lost Stocks"]).to_excel(writer, index=False, sheet_name="Errors")
-            if not qualifying_stocks and not error_stocks:
-                pd.DataFrame(["No available data"]).to_excel(writer, index=False, header=False, sheet_name="No Data")
+            if qualified_stocks:
+                df_qualified.to_excel(writer, index=False, sheet_name="Qualified Stocks")
+            if unqualified_stocks:
+                df_unqualified.to_excel(writer, index=False, sheet_name="Unqualified Stocks")
+            if lost_stocks:
+                df_lost.to_excel(writer, index=False, sheet_name="Lost Stocks")
 
         with open("results.xlsx", "rb") as file:
             st.download_button(
@@ -204,51 +168,3 @@ if st.button("Analyze"):
                 file_name="HondAlgo_Results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-
-# ================== FOOTER ==================
-
-st.markdown(
-    """
-    <style>
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 10px 0;
-            background-color: #333333;
-            color: white;
-            font-size: 14px;
-        }
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-        .footer-center {
-            flex: 1;
-            text-align: center;
-        }
-        .footer-right {
-            text-align: right;
-        }
-        .footer-center a {
-            color: white;
-            text-decoration: none;
-        }
-        .footer-center a:hover {
-            text-decoration: underline;
-        }
-    </style>
-    <div class="footer">
-        <div class="footer-content">
-            <div class="footer-center">
-                © 2024 HondAlgo. Designed by: 
-                <a href="https://www.facebook.com/share/1YtvJ13iDG/" target="_blank">Mohaned Abdallah</a>
-            </div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
