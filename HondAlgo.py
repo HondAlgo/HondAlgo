@@ -4,77 +4,65 @@ import yfinance as yf
 import time
 
 
-# ================== FUNCTIONS ==================
+# ================= FUNCTIONS =================
 
-def fetch_stock_data(symbol, period="1y"):
-    """Fetch historical daily data for a stock symbol."""
+def fetch_stock_data(symbol, period):
+    """
+    Fetch historical daily data for a given stock symbol using yfinance.
+    """
     try:
         return yf.download(symbol, period=period, interval="1d")
-    except Exception as e:
+    except Exception:
         return None
 
 
 def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
-    """Calculate EMAs, Williams %R, Relative Volume, and Buy Signal."""
-    # Ensure the DataFrame has valid data
-    if df is None or df.empty or 'Close' not in df.columns:
-        raise ValueError("DataFrame is empty or does not contain required columns.")
-
-    # Calculate EMAs
+    """
+    Calculate technical indicators (EMA and Williams %R) for the stock data.
+    """
     df['EMA_Fast'] = df['Close'].ewm(span=ema_fast, adjust=False).mean()
     df['EMA_Mid'] = df['Close'].ewm(span=ema_mid, adjust=False).mean()
     df['EMA_Slow'] = df['Close'].ewm(span=ema_slow, adjust=False).mean()
 
-    # Calculate Williams %R
     high_roll = df['High'].rolling(window=wr_length)
     low_roll = df['Low'].rolling(window=wr_length)
     df['%R'] = (high_roll.max() - df['Close']) / (high_roll.max() - low_roll.min()) * -100
 
-    # Volume-based calculations (only if Volume column exists)
-    if 'Volume' in df.columns and not df['Volume'].isnull().all():
-        df['Volume_SMA'] = df['Volume'].rolling(window=30).mean()
-        df['Rel_Volume'] = df['Volume'] / df['Volume_SMA']
-        df['Rel_Volume'] = df['Rel_Volume'].fillna(0)  # Fill NaN values with 0
-    else:
-        df['Rel_Volume'] = 0  # Default to 0 if Volume data is missing
-
-    # Buy Signal Conditions
     df['EMA_Aligned'] = (df['EMA_Fast'] > df['EMA_Mid']) & (df['EMA_Mid'] > df['EMA_Slow'])
     df['WR_Cross'] = (df['%R'].shift(1) <= -80) & (df['%R'] > -80)
-    df['Close_Above_EMA50'] = df['Close'] > df['EMA_Mid']
-    
-    # Final Buy Signal
-    df['Buy_Signal'] = (
-        df['EMA_Aligned'] & 
-        df['WR_Cross'] & 
-        df['Close_Above_EMA50'] & 
-        (df['Rel_Volume'] > 1)  # Ensure relative volume is above average
-    )
+    df['Buy_Signal'] = df['EMA_Aligned'] & df['WR_Cross']
     
     return df
 
 
-# ================== STREAMLIT UI ==================
+# ================= STREAMLIT UI =================
 
+# Title Section
 st.markdown(
     """
     <div style="text-align: center;">
         <h1>HondAlgo</h1>
-        <p>Algorithm analyzes stock data and detects stocks with high bullish potential.</p>
+        <p>Algorithm analyzes stock data to detect stocks with high bullish potential.</p>
     </div>
     """,
     unsafe_allow_html=True
 )
 
-# Sidebar for parameter inputs
+# Sidebar Parameters
 st.sidebar.header("Set Parameters")
 ema_fast = st.sidebar.number_input("Fast EMA Length", value=20, min_value=1)
 ema_mid = st.sidebar.number_input("Mid EMA Length", value=50, min_value=1)
 ema_slow = st.sidebar.number_input("Slow EMA Length", value=100, min_value=1)
 wr_length = st.sidebar.number_input("Williams %R Length", value=14, min_value=1)
 
-period = "1y"  # Fixed 1-year period for consistency
+period = st.sidebar.selectbox(
+    "Select Stock Data Period",
+    options=["1 day", "5 days", "1 month", "3 months", "6 months", "1 year", "2 years", "5 years", "10 years", "max"],
+    index=5,
+    help="Select the period for fetching historical stock data."
+)
 
+# Input Stock Symbols Section
 st.markdown(
     """
     <div style="text-align: center;">
@@ -86,7 +74,30 @@ st.markdown(
 )
 symbols = st.text_area("", "AAPL, MSFT, TSLA")
 
-# ================== ANALYSIS PROCESS ==================
+# Centered Analyze Button
+st.markdown(
+    """
+    <style>
+        div.stButton > button {
+            display: block;
+            margin: 0 auto;
+            background-color: #333333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        div.stButton > button:hover {
+            background-color: #444444;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ================= PROCESSING =================
 
 if st.button("Analyze"):
     stock_symbols = [s.strip() for s in symbols.split(",") if s.strip()]
@@ -95,7 +106,11 @@ if st.button("Analyze"):
         st.error("Please provide at least one stock symbol.")
     else:
         analyzing_placeholder = st.markdown(
-            f"<div style='text-align: center; font-size: 18px;'>Analyzing {len(stock_symbols)} stocks 📈💹...</div>",
+            f"""
+            <div style="text-align: center; font-size: 18px;">
+                Analyzing {len(stock_symbols)} stocks 📈💹...
+            </div>
+            """,
             unsafe_allow_html=True
         )
 
@@ -109,22 +124,24 @@ if st.button("Analyze"):
         for i, symbol in enumerate(stock_symbols):
             current_icon = stock_icons[i % len(stock_icons)]
             status_placeholder.markdown(
-                f"<div style='text-align: center; font-size: 18px;'>Analyzing {i+1}/{len(stock_symbols)}: {symbol} {current_icon}</div>",
+                f"""
+                <div style="text-align: center; font-size: 18px;">
+                    Analyzing {i+1}/{len(stock_symbols)}: {symbol} {current_icon}
+                </div>
+                """,
                 unsafe_allow_html=True
             )
-            progress.progress(int((i + 1) * step))
             
-            try:
-                df = fetch_stock_data(symbol, period=period)
-                if df is None or df.empty:
-                    raise ValueError(f"No data available for {symbol}.")
-                
-                df = calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length)
-                if df['Buy_Signal'].iloc[-1]:
-                    qualifying_stocks.append(symbol)
-            except Exception as e:
+            progress.progress(int((i + 1) * step))
+            df = fetch_stock_data(symbol, period=period)
+
+            if df is None or df.empty:
                 error_stocks.append(symbol)
-                st.warning(f"Error analyzing {symbol}: {str(e)}")
+                continue
+            
+            df = calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length)
+            if df['Buy_Signal'].iloc[-1]:
+                qualifying_stocks.append(symbol)
 
             time.sleep(0.5)
         
@@ -132,28 +149,35 @@ if st.button("Analyze"):
         analyzing_placeholder.empty()
 
         st.markdown(
-            f"<div style='text-align: center; font-size: 18px; color: green;'>{len(stock_symbols)} stocks have been analyzed successfully ✅</div>",
+            f"""
+            <div style="text-align: center; font-size: 18px; color: green;">
+                {len(stock_symbols)} stocks have been analyzed successfully ✅
+            </div>
+            """,
             unsafe_allow_html=True
         )
 
         st.markdown("### Results")
         
+        # Display Qualified Stocks
+        st.subheader("Qualified Stocks")
         if qualifying_stocks:
-            st.subheader("Qualified Stocks")
             df_qualifying = pd.DataFrame(qualifying_stocks, columns=["Stock"])
             df_qualifying.index += 1
             st.dataframe(df_qualifying)
         else:
             st.write("No qualified stocks found.")
 
+        # Display Lost Stocks
+        st.subheader("Lost Stocks")
         if error_stocks:
-            st.subheader("Lost Stocks")
             df_errors = pd.DataFrame(error_stocks, columns=["Stock"])
             df_errors.index += 1
             st.dataframe(df_errors)
         else:
             st.write("No errors detected.")
 
+        # Prepare and Download Results
         with pd.ExcelWriter("results.xlsx", engine="openpyxl") as writer:
             if qualifying_stocks:
                 df_qualifying.to_excel(writer, index=False, sheet_name="Buy Signals")
@@ -166,11 +190,11 @@ if st.button("Analyze"):
             st.download_button(
                 label="Download Results as Xlsx",
                 data=file,
-                file_name="HondAlgo_Results.xlsx",
+                file_name="HondaAlgo_Results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
-# ================== FOOTER ==================
+# ================= FOOTER =================
 
 st.markdown(
     """
@@ -195,20 +219,17 @@ st.markdown(
             flex: 1;
             text-align: center;
         }
-        .footer-center a {
-            color: white;
-            text-decoration: none;
-        }
-        .footer-center a:hover {
-            color: blue; /* Change text color to blue on hover */
-            text-decoration: underline;
+        .footer-right {
+            text-align: right;
         }
     </style>
     <div class="footer">
         <div class="footer-content">
             <div class="footer-center">
-                © 2024 HondAlgo. Designed by: 
-                <a href="https://www.facebook.com/share/1YtvJ13iDG/" target="_blank">Mohaned Abdallah</a>
+                Designed by M.Hossam
+            </div>
+            <div class="footer-right">
+                Copyright © 2024 Hondalgo
             </div>
         </div>
     </div>
