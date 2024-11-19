@@ -68,18 +68,6 @@ def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
 
 # ================== STREAMLIT UI ==================
 
-# Safely initialize session state variables
-defaults = {
-    "ema_fast": 20,
-    "ema_mid": 50,
-    "ema_slow": 100,
-    "wr_length": 14,
-    "period": "1 year"
-}
-for key, value in defaults.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
-
 st.markdown(
     """
     <div style="text-align: center;">
@@ -92,22 +80,16 @@ st.markdown(
 
 # Sidebar for parameter inputs
 st.sidebar.header("Set Parameters")
-ema_fast = st.sidebar.number_input("Fast EMA Length", value=st.session_state.ema_fast, min_value=1, key="ema_fast")
-ema_mid = st.sidebar.number_input("Mid EMA Length", value=st.session_state.ema_mid, min_value=1, key="ema_mid")
-ema_slow = st.sidebar.number_input("Slow EMA Length", value=st.session_state.ema_slow, min_value=1, key="ema_slow")
-wr_length = st.sidebar.number_input("Williams %R Length", value=st.session_state.wr_length, min_value=1, key="wr_length")
+ema_fast = st.sidebar.number_input("Fast EMA Length", value=20, min_value=1)
+ema_mid = st.sidebar.number_input("Mid EMA Length", value=50, min_value=1)
+ema_slow = st.sidebar.number_input("Slow EMA Length", value=100, min_value=1)
+wr_length = st.sidebar.number_input("Williams %R Length", value=14, min_value=1)
+
 period = st.sidebar.selectbox(
     "Select Stock Data Period",
     options=["1d", "5d", "1 month", "3 months", "6 months", "1 year", "2 years", "5 years", "10 years", "max"],
-    index=["1d", "5d", "1 month", "3 months", "6 months", "1 year", "2 years", "5 years", "10 years", "max"].index(st.session_state.period),
-    key="period"
+    index=5
 )
-
-# Reset button logic
-if st.sidebar.button("Reset Parameters"):
-    for key, value in defaults.items():
-        st.session_state[key] = value
-    st.sidebar.success("Parameters reset to default values!")
 
 st.markdown(
     """
@@ -119,6 +101,29 @@ st.markdown(
     unsafe_allow_html=True
 )
 symbols = st.text_area("", "AAPL, MSFT, TSLA")
+
+st.markdown(
+    """
+    <style>
+        div.stButton > button {
+            display: block;
+            margin: 0 auto;
+            background-color: #333333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        div.stButton > button:hover {
+            background-color: #444444;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 
 
