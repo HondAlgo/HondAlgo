@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import time
+import os
 
 # ================== FUNCTIONS ==================
 
@@ -24,7 +25,7 @@ def fetch_stock_data(symbol, period):
 
     # Parameters for the API
     params = {
-        "api_token": "673b9626ee95c0.80706722",  # Replace with your API key
+        "api_token": os.getenv("EODHD_API_TOKEN"),  # Secure API key using environment variables
         "fmt": "json"  # Fetch data in JSON format
     }
 
@@ -46,7 +47,7 @@ def fetch_stock_data(symbol, period):
 
         return df
     except Exception as e:
-        print(f"Error fetching data for {symbol}: {e}")
+        st.error(f"Error fetching data for {symbol}: {e}")
         return None
 
 
@@ -112,6 +113,7 @@ if reset:
     st.session_state.ema_slow = 100
     st.session_state.wr_length = 14
     st.session_state.period = "1 year"
+    st.sidebar.success("Parameters reset to default values!")
 
 st.markdown(
     """
@@ -123,29 +125,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 symbols = st.text_area("", "AAPL, MSFT, TSLA")
-
-# Centered Analyze button
-analyze_placeholder = st.markdown(
-    """
-    <style>
-        div.stButton > button {
-            display: block;
-            margin: 0 auto;
-            background-color: #333333;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        div.stButton > button:hover {
-            background-color: #444444;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 # ================== ANALYSIS PROCESS ==================
 
@@ -198,7 +177,6 @@ if st.button("Analyze"):
         )
 
         # Combine results into a single DataFrame
-                # Combine results into a single DataFrame
         max_len = max(len(qualifying_stocks), len(not_qualified_stocks), len(error_stocks))
         combined_results = pd.DataFrame({
             "Qualified Stocks": qualifying_stocks + [""] * (max_len - len(qualifying_stocks)),
@@ -220,10 +198,12 @@ if st.button("Analyze"):
         with open("results.xlsx", "rb") as file:
             st.download_button(
                 label="Download Results as Xlsx",
-                data=file,
+                data=file.read(),
                 file_name="HondAlgo_Results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
+# Footer
 st.markdown(
     """
     <style>
