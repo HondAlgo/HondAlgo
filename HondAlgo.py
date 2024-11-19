@@ -224,8 +224,6 @@ if st.button("Analyze"):
                 file_name="HondAlgo_Results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-# ================= FOOTER =================
-
 st.markdown(
     """
     <style>
@@ -241,25 +239,24 @@ st.markdown(
         }
         .footer-content {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             padding: 0 20px;
         }
-        .footer-center {
-            flex: 1;
-            text-align: center;
+        .footer-center a {
+            color: white;
+            text-decoration: none;
         }
-        .footer-right {
-            text-align: right;
+        .footer-center a:hover {
+            text-decoration: underline;
+            color: blue;
         }
     </style>
     <div class="footer">
         <div class="footer-content">
             <div class="footer-center">
-                Designed by M.Hossam
-            </div>
-            <div class="footer-right">
-                Copyright © 2024 Hondalgo
+                © 2024 HondAlgo. Designed by: 
+                <a href="https://www.facebook.com/share/1YtvJ13iDG/" target="_blank" rel="noopener noreferrer" aria-label="Designer Facebook Profile">Mohaned Abdallah</a>
             </div>
         </div>
     </div>
