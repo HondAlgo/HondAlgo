@@ -68,6 +68,18 @@ def calculate_indicators(df, ema_fast, ema_mid, ema_slow, wr_length):
 
 # ================== STREAMLIT UI ==================
 
+# Safely initialize session state variables
+defaults = {
+    "ema_fast": 20,
+    "ema_mid": 50,
+    "ema_slow": 100,
+    "wr_length": 14,
+    "period": "1 year"
+}
+for key, value in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
+
 st.markdown(
     """
     <div style="text-align: center;">
@@ -80,24 +92,10 @@ st.markdown(
 
 # Sidebar for parameter inputs
 st.sidebar.header("Set Parameters")
-
-# Initialize session state variables if not set
-if "ema_fast" not in st.session_state:
-    st.session_state.ema_fast = 20
-if "ema_mid" not in st.session_state:
-    st.session_state.ema_mid = 50
-if "ema_slow" not in st.session_state:
-    st.session_state.ema_slow = 100
-if "wr_length" not in st.session_state:
-    st.session_state.wr_length = 14
-if "period" not in st.session_state:
-    st.session_state.period = "1 year"
-
 ema_fast = st.sidebar.number_input("Fast EMA Length", value=st.session_state.ema_fast, min_value=1, key="ema_fast")
 ema_mid = st.sidebar.number_input("Mid EMA Length", value=st.session_state.ema_mid, min_value=1, key="ema_mid")
 ema_slow = st.sidebar.number_input("Slow EMA Length", value=st.session_state.ema_slow, min_value=1, key="ema_slow")
 wr_length = st.sidebar.number_input("Williams %R Length", value=st.session_state.wr_length, min_value=1, key="wr_length")
-
 period = st.sidebar.selectbox(
     "Select Stock Data Period",
     options=["1d", "5d", "1 month", "3 months", "6 months", "1 year", "2 years", "5 years", "10 years", "max"],
@@ -105,13 +103,11 @@ period = st.sidebar.selectbox(
     key="period"
 )
 
-reset = st.sidebar.button("Reset Parameters")
-if reset:
-    st.session_state.ema_fast = 20
-    st.session_state.ema_mid = 50
-    st.session_state.ema_slow = 100
-    st.session_state.wr_length = 14
-    st.session_state.period = "1 year"
+# Reset button logic
+if st.sidebar.button("Reset Parameters"):
+    for key, value in defaults.items():
+        st.session_state[key] = value
+    st.sidebar.success("Parameters reset to default values!")
 
 st.markdown(
     """
@@ -124,28 +120,7 @@ st.markdown(
 )
 symbols = st.text_area("", "AAPL, MSFT, TSLA")
 
-# Centered Analyze button
-analyze_placeholder = st.markdown(
-    """
-    <style>
-        div.stButton > button {
-            display: block;
-            margin: 0 auto;
-            background-color: #333333;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        div.stButton > button:hover {
-            background-color: #444444;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+
 
 # ================== ANALYSIS PROCESS ==================
 
