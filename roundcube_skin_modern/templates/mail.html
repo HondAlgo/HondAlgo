@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Roundcube — Modern</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles/_tokens.css" />
+    <link rel="stylesheet" href="styles/layout.css" />
+    <link rel="stylesheet" href="styles/components.css" />
+    <link rel="stylesheet" href="styles/overrides.css" />
+  </head>
+  <body class="task-mail">
+    <div id="layout">
+      <header class="header">
+        <div class="header__brand">
+          <div class="header__brand-logo">RC</div>
+          <div>
+            <div class="text-sm">Roundcube</div>
+            <strong>Modern Workspace</strong>
+          </div>
+        </div>
+        <div class="header__search">
+          <input type="search" placeholder="Search mail, contacts, or files" />
+        </div>
+        <div class="header__actions">
+          <button type="button">Compose</button>
+          <button type="button">Filter</button>
+          <button type="button">Settings</button>
+        </div>
+      </header>
+
+      <aside class="sidebar">
+        <section class="sidebar__card">
+          <strong>Inbox Overview</strong>
+          <p class="text-muted">Focus on what matters with priority inbox insights.</p>
+        </section>
+        <nav class="sidebar__card sidebar__folders">
+          <div class="sidebar__folder sidebar__folder--active">
+            <span>Inbox</span>
+            <span class="badge">23</span>
+          </div>
+          <div class="sidebar__folder">
+            <span>Starred</span>
+            <span class="badge">8</span>
+          </div>
+          <div class="sidebar__folder">
+            <span>Sent</span>
+          </div>
+          <div class="sidebar__folder">
+            <span>Drafts</span>
+            <span class="badge">2</span>
+          </div>
+          <div class="sidebar__folder">
+            <span>Archive</span>
+          </div>
+          <div class="sidebar__folder">
+            <span>Spam</span>
+            <span class="badge">14</span>
+          </div>
+          <div class="sidebar__folder">
+            <span>Trash</span>
+          </div>
+        </nav>
+      </aside>
+
+      <section class="mail-list">
+        <div class="mail-list__controls">
+          <div class="control-pill">
+            Focused Inbox
+            <button title="Switch to All">×</button>
+          </div>
+          <div class="list-density-toggle">
+            <button class="is-active">Comfortable</button>
+            <button>Compact</button>
+          </div>
+        </div>
+        <div class="mail-list__row mail-list__row--unread">
+          <div class="avatar">JD</div>
+          <div>
+            <strong>Jane Doe</strong>
+            <div class="text-muted">Project kickoff notes and timelines</div>
+          </div>
+          <div class="message-flags">
+            <span>10:24</span>
+            <div class="message-flags__item">★</div>
+          </div>
+        </div>
+        <div class="mail-list__row">
+          <div class="avatar avatar--small">TW</div>
+          <div>
+            <strong>Team Weekly</strong>
+            <div class="text-muted">Sprint review agenda</div>
+          </div>
+          <div class="message-flags">
+            <span>Yesterday</span>
+            <div class="message-flags__item">✓</div>
+          </div>
+        </div>
+        <div class="mail-list__row">
+          <div class="avatar avatar--small">AC</div>
+          <div>
+            <strong>Account Alerts</strong>
+            <div class="text-muted">Security verification required</div>
+          </div>
+          <div class="message-flags">
+            <span>Fri</span>
+            <div class="message-flags__item">!</div>
+          </div>
+        </div>
+      </section>
+
+      <article class="mail-preview">
+        <header class="mail-preview__header">
+          <div class="tag">High Priority</div>
+          <h2>Project kickoff notes and timelines</h2>
+          <div class="mail-preview__meta">
+            <span>From: Jane Doe &lt;jane@example.com&gt;</span>
+            <span>To: You</span>
+            <span>10:24 AM</span>
+            <span class="badge">Unread</span>
+          </div>
+        </header>
+        <div class="mail-preview__body">
+          <p>Hey team,</p>
+          <p>
+            Thanks for joining the kickoff session this morning. Attached is the recap deck,
+            action items, and updated project timelines. Let me know if anything needs further
+            clarification before our next sync.
+          </p>
+          <p>Best,<br />Jane</p>
+        </div>
+        <footer class="mail-preview__actions">
+          <button>Reply</button>
+          <button>Forward</button>
+          <button>Archive</button>
+        </footer>
+      </article>
+    </div>
+  </body>
+</html>

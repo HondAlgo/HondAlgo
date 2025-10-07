@@ -1,0 +1,51 @@
+:root {
+  /* Color palette */
+  --color-bg: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f0f2f8;
+  --color-primary: #3366ff;
+  --color-primary-hover: #274bcc;
+  --color-accent: #ffb547;
+  --color-success: #2fbf71;
+  --color-danger: #ff5f5f;
+  --color-text: #1c2333;
+  --color-text-muted: #5c6375;
+  --color-border: #d8dbe6;
+  --shadow-elevated: 0 12px 30px rgba(39, 66, 134, 0.12);
+  --shadow-subtle: 0 4px 12px rgba(39, 66, 134, 0.08);
+
+  /* Typography */
+  --font-base: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-lg: 18px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+
+  /* Sizing */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Transitions */
+  --transition-base: 160ms ease;
+  --transition-slow: 280ms ease;
+}
+
+body {
+  font-family: var(--font-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+}

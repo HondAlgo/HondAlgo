@@ -1,0 +1,9 @@
+{
+  "name": "Modern",
+  "author": "HondAlgo UI Team",
+  "version": "1.0.0",
+  "license": "MIT",
+  "date": "2024-06-01",
+  "url": "https://github.com/example/roundcube-modern-skin",
+  "extends": "elastic"
+}
