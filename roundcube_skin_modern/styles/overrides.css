@@ -1,0 +1,122 @@
+@import url('./_tokens.css');
+
+body.task-mail #layout {
+  min-height: 100vh;
+}
+
+body.task-mail #messagelist-container,
+body.task-mail #messageviewbottom,
+body.task-mail #messagecontframe {
+  background: transparent;
+}
+
+body.task-mail .listing tbody tr {
+  border-bottom: 1px solid rgba(216, 219, 230, 0.6);
+}
+
+body.task-mail .listing tbody tr.unread > td {
+  background: rgba(51, 102, 255, 0.08);
+  font-weight: var(--font-weight-medium);
+}
+
+body.task-mail .listing tbody tr:hover > td {
+  background: rgba(51, 102, 255, 0.05);
+}
+
+body.task-mail .toolbar a.button,
+body.task-mail .toolbar button.button,
+body.task-mail .toolbar button,
+body.task-mail .toolbar a {
+  background: var(--color-surface-alt);
+  border: none;
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  margin-right: var(--space-xs);
+  transition: background var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+body.task-mail .toolbar a.button:hover,
+body.task-mail .toolbar button.button:hover,
+body.task-mail .toolbar button:hover,
+body.task-mail .toolbar a:hover {
+  background: rgba(51, 102, 255, 0.1);
+  box-shadow: var(--shadow-subtle);
+  transform: translateY(-1px);
+}
+
+body.task-mail .splitter {
+  background: transparent;
+  border: none;
+}
+
+body.task-mail .header > .buttons {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+body.task-mail .header > .buttons > * {
+  margin: 0;
+}
+
+body.task-mail #message-body {
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+body.task-mail #message-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+body.task-mail #message-header .header-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+body.task-mail #messageheaderbottom {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface-alt);
+}
+
+body.task-mail #messageheaderbottom .buttons button {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: none;
+  padding: var(--space-sm) var(--space-md);
+  box-shadow: var(--shadow-subtle);
+}
+
+body.task-mail #mailview-right .boxlistcontent {
+  padding: var(--space-lg);
+  background: transparent;
+}
+
+body.task-mail #mailboxlist > li > a {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+}
+
+body.task-mail #mailboxlist > li.selected > a {
+  background: rgba(51, 102, 255, 0.12);
+  color: var(--color-primary);
+}
+
+body.task-mail #mailview-left {
+  background: transparent;
+}
+
+body.task-mail .listbox .scroller {
+  scrollbar-width: thin;
+}
+
+body.task-mail .listbox .scroller::-webkit-scrollbar {
+  width: 6px;
+}
+
+body.task-mail .listbox .scroller::-webkit-scrollbar-thumb {
+  background-color: rgba(27, 42, 78, 0.22);
+  border-radius: var(--radius-md);
+}
